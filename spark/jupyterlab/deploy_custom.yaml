@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-labs
+  labels:
+    app: jupyter-labs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyter-labs
+  template:
+    metadata:
+      labels:
+        app: jupyter-labs
+    spec:
+      serviceAccountName: spark-sa
+      containers:
+        - name: jupyter-labs
+          image: jupyter/pyspark-notebook:python-3.10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8888
+      imagePullSecrets:
+        - name: insilico-registry
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-labs
+  labels:
+    app: jupyter-labs
+spec:
+  ports:
+    - protocol: TCP
+      port: 29413
+  selector:
+    app: jupyter-labs
+  clusterIP: None
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-labs-ui
+  labels:
+    app: jupyter-labs-ui
+spec:
+  ports:
+    - protocol: TCP
+      port: 8888
+  selector:
+    app: jupyter-labs
+  type: NodePort
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spark-sa
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: spark
+  name: spark-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps" ]
+  verbs: ["create", "get", "watch", "list", "post", "delete"  ]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spark-role-binding
+subjects:
+- kind: ServiceAccount
+  name: spark-sa
+  namespace: spark
+roleRef:
+  kind: ClusterRole
+  name: spark-role
+  apiGroup: rbac.authorization.k8s.io

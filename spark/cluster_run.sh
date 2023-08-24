@@ -1,13 +1,11 @@
 #!/bin/bash
 
-k8s_host=10.12.168.200
-k8s_port=6443
-k8s_api='rancher.seegene.com/k8s/clusters/c-94r7g'
-
+k8s_api=$(kubectl config view --minify -o jsonpath="{.clusters[0].cluster.server}")
+echo ${k8s_api}
 cd spark-3.4.0-bin-hadoop3 
 
 ./bin/spark-submit \
-    --master k8s://https://${k8s_api} \
+    --master k8s://${k8s_api} \
     --deploy-mode cluster \
     --name spark-pi \
     --class org.apache.spark.examples.SparkPi \
