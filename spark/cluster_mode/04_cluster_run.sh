@@ -10,7 +10,7 @@ cd spark-3.4.0-bin-hadoop3
     --name spark-pi \
     --class org.apache.spark.examples.SparkPi \
     --conf spark.kubernetes.namespace=spark \
-    --conf spark.executor.instances=5 \
+    --conf spark.executor.instances=10 \
     --conf spark.kubernetes.container.image=docker.seegene.com/spark-py:latest \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
     --conf spark.kubernetes.container.image.pullSecrets=insilico-registry \

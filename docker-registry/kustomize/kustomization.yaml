@@ -1,0 +1,7 @@
+# kustomization for dev-docker repo
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: docker
+resources:
+  - deployment.yaml
+  - service.yaml

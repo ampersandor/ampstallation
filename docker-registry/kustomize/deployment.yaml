@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-registry-deployment
+  namespace: docker
+  labels:
+    app: docker-registry-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-registry-service
+  template:
+    metadata:
+      labels:
+        app: docker-registry-service
+    spec:
+      volumes:
+      - name: registry-data-volume
+        persistentVolumeClaim: 
+          claimName: docker-storage-pvc
+      - name: htpasswd-volume
+        secret:
+          secretName: auth-secret
+      - name: certs-vol
+        secret:
+          secretName: certs-secret 
+      containers:
+      - name: docker-registry
+        image: registry:2.7.0
+        env:
+        - name: REGISTRY_AUTH
+          value: "htpasswd"
+        - name: REGISTRY_AUTH_HTPASSWD_REALM
+          value: "Registry Realm"
+        - name: REGISTRY_AUTH_HTPASSWD_PATH
+          value: "/auth/htpasswd"
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: "/certs/tls.crt"
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: "/certs/tls.key"
+        ports:
+          - name: docker-port
+            containerPort: 5000
+        volumeMounts:
+        - name: registry-data-volume
+          mountPath: "/var/lib/registry"
+        - name: certs-vol
+          mountPath: "/certs"
+          readOnly: true
+        - name: htpasswd-volume
+          mountPath: "/auth"
+          readOnly: true
+      - name: registry-ui
+        image: joxit/docker-registry-ui:1.5-static
+        ports:
+        - name: http
+          containerPort: 80
+        env:
+        - name: REGISTRY_URL
+          value: https://docker-registry:5000
+        - name: DELETE_IMAGES
+          value: "true"

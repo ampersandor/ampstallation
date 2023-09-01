@@ -14,15 +14,15 @@ spec:
       labels:
         app: jupyter-labs
     spec:
-      serviceAccountName: spark-sa
+      serviceAccountName: spark-sa  # assign service account name
       containers:
         - name: jupyter-labs
-          image: jupyter/pyspark-notebook:python-3.10
+          image: jupyter/pyspark-notebook:python-3.10 # use python3.10 version which is compatible with spark-3.4.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8888
       imagePullSecrets:
-        - name: insilico-registry
+        - name: insilico-registry # give image pull secrets
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -51,7 +51,7 @@ spec:
       port: 8888
   selector:
     app: jupyter-labs
-  type: NodePort
+  type: NodePort # Node port: you can specify the port here
 ---
 apiVersion: v1
 kind: ServiceAccount

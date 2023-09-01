@@ -325,17 +325,19 @@ extraConfigMaps: {}
 # Extra env 'items' that will be added to the definition of airflow containers
 # a string is expected (can be templated).
 # TODO: difference from `env`? This is a templated string. Probably should template `env` and remove this.
-extraEnv: ~
+# extraEnv: ~
 # eg:
-# extraEnv: |
-#   - name: AIRFLOW__CORE__LOAD_EXAMPLES
-#     value: 'True'
+extraEnv: |
+  - name: AIRFLOW__CORE__LOAD_EXAMPLES
+    value: 'True'
 
 # Extra envFrom 'items' that will be added to the definition of airflow containers
 # A string is expected (can be templated).
+
+# ampersandor
 extraEnvFrom: |
-  - configMapRef:  # ampersandor
-      name: 'airflow-variables'
+  - configMapRef:  
+      name: '{{ .Release.Name }}-airflow-variables'
 # eg:
 # extraEnvFrom: |
 #   - secretRef:
@@ -1906,7 +1908,8 @@ redis:
 # Auth secret for a private registry
 # This is used if pulling airflow images from a private registry
 registry:
-  secretName: ~
+  #secretName: ~
+  secretName: insilico-docker-registry # ampersandor
 
   # Example:
   # connection:
@@ -2091,8 +2094,10 @@ config:
   kubernetes_executor:
     namespace: '{{ .Release.Namespace }}'
     pod_template_file: '{{ include "airflow_pod_template_file" . }}/pod_template_file.yaml'
-    worker_container_repository: '{{ .Values.images.airflow.repository | default .Values.defaultAirflowRepository }}'
-    worker_container_tag: '{{ .Values.images.airflow.tag | default .Values.defaultAirflowTag }}'
+    # worker_container_repository: '{{ .Values.images.airflow.repository | default .Values.defaultAirflowRepository }}'
+    worker_container_repository: 'docker.seegene.com/airflow-worker' # ampersandor
+    # worker_container_tag: '{{ .Values.images.airflow.tag | default .Values.defaultAirflowTag }}'
+    worker_container_tag: 'latest' # ampersandor
     multi_namespace_mode: '{{ ternary "True" "False" .Values.multiNamespaceMode }}'
 # yamllint enable rule:line-length
 
@@ -2141,14 +2146,16 @@ dags:
     ## the name of an existing PVC to use
     existingClaim:
     ## optional subpath for dag volume mount
-    subPath: ~
+    subPath: ~ 
   gitSync:
+    #enabled: false
     enabled: true # ampersandor
 
     # git repo clone url
     # ssh example: git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: git@dev-git.seegene.com/dhkim4/insilico-dags.git  # ampersandor
+    # repo: git@dev-git.seegene.com/dhkim4/insilico-dags.git  # ampersandor
+    repo: git@github.com:seegenelab/insilico-dags.git  # ampersandor
     branch: main  # ampersandor
     rev: HEAD
     depth: 1
@@ -2156,7 +2163,7 @@ dags:
     maxFailures: 0
     # subpath within the repo where dags are located
     # should be "" if dags are at repo root
-    subPath: "dags" # ampersandor
+    subPath: dags  # ampersandor
     sshKeySecret: "airflow-ssh-git-secret"  # ampersandor
     # if your repo needs a user name password
     # you can load them to a k8s secret like the one below
@@ -2230,7 +2237,7 @@ dags:
 logs:
   persistence:
     # Enable persistent volume for storing logs
-    enabled: false
+    enabled: true  # ampersandor
     # Volume size for logs
     size: 100Gi
     # Annotations for the logs PVC

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-registry='docker.seegene.com'
+#registry='docker.seegene.com'
+registry='docker-registry:31000'
 
 cd spark-3.4.0-bin-hadoop3
 

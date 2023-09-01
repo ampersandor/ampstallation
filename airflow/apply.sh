@@ -24,8 +24,9 @@ echo "[1/6] Check if helm repo exists"
 IF_REPO=$(helm repo list | grep "apache-airflow")
 if [ -z "$IF_REPO" ]; then
     helm repo add apache-airflow https://airflow.apache.org
+    helm repo update apache-airflow
 else
-    echo "apache-airflow already exists."
+    helm repo update apache-airflow
 fi
 
 echo "[2/6] Create values.yaml"
