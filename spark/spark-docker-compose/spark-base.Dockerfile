@@ -11,11 +11,26 @@ RUN apt-get update -y && \
     mkdir /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}/logs && \
     rm spark.tgz
 
+COPY redshift-jdbc42-2.1.0.19/* /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}/jars/
+
 ENV SPARK_HOME /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}
-ENV SPARK_MASTER_HOST spark-master
-ENV SPARK_MASTER_PORT 7077
 ENV PYSPARK_PYTHON python3
 
+ENV SPARK_MASTER_HOST spark-master
+ENV SPARK_MASTER_PORT 7077
+
+ENV SPARK_MASTER_WEBUI_PORT=8080
+ENV SPARK_WORKER_WEBUI_PORT=8081
+
+ENV SPARK_LOG_DIR=/opt/spark/logs 
+ENV SPARK_MASTER_LOG=/opt/spark/logs/spark-master.out 
+ENV SPARK_WORKER_LOG=/opt/spark/logs/spark-worker.out
+
+RUN mkdir -p $SPARK_LOG_DIR && \
+    touch $SPARK_MASTER_LOG && \
+    touch $SPARK_WORKER_LOG && \
+    ln -sf /dev/stdout $SPARK_MASTER_LOG && \
+    ln -sf /dev/stdout $SPARK_WORKER_LOG
 # -- Runtime
 
 WORKDIR ${SPARK_HOME}

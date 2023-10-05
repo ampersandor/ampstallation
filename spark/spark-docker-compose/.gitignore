@@ -1,0 +1,5 @@
+*.out
+spark-warehouse
+metastore_db
+dataOutput/
+.ipynb_checkpoints/
