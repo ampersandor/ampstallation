@@ -3,12 +3,15 @@ FROM cluster-base
 ARG spark_version  # will be passed through the command line in bash
 ARG hadoop_version  # will be passed through the command line in bash
 
-COPY spark-${spark_version}-bin-hadoop${hadoop_version} /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}
-COPY extra_jars/* /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}/jars/
-
 RUN apt-get update -y && \
     apt-get install -y curl wget && \
-    mkdir /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}/logs
+    curl https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${spark_version}-bin-hadoop${hadoop_version}.tgz -o spark.tgz && \
+    tar -xf spark.tgz && \
+    mv spark-${spark_version}-bin-hadoop${hadoop_version} /usr/bin/ && \
+    mkdir /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}/logs && \
+    rm spark.tgz
+
+COPY jars/* /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}/jars/
 
 ENV SPARK_HOME /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}
 ENV PYSPARK_PYTHON python3
