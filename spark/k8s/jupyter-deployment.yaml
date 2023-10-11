@@ -17,12 +17,12 @@ spec:
       serviceAccountName: spark-sa  # assign service account name
       containers:
         - name: jupyter-labs
-          image: jupyter/pyspark-notebook:python-3.10 # use python3.10 version which is compatible with spark-3.4.0
+          image: jupyter/pyspark-notebook:python-3.10 # use python3.10 version which is compatible with spark-3.4.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8888
       imagePullSecrets:
-        - name: insilico-registry # give image pull secrets
+        - name: docker-registry-secret # give image pull secrets
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -52,31 +52,3 @@ spec:
   selector:
     app: jupyter-labs
   type: NodePort # Node port: you can specify the port here
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: spark-sa
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: spark
-  name: spark-role
-rules:
-- apiGroups: [""]
-  resources: ["pods", "services", "configmaps" ]
-  verbs: ["create", "get", "watch", "list", "post", "delete"  ]
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: spark-role-binding
-subjects:
-- kind: ServiceAccount
-  name: spark-sa
-  namespace: spark
-roleRef:
-  kind: ClusterRole
-  name: spark-role
-  apiGroup: rbac.authorization.k8s.io
